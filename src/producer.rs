@@ -60,6 +60,11 @@ pub struct NSQProducer {
 }
 
 impl NSQProducer {
+    /// get healthy status
+    pub fn healthy(&self) -> bool {
+        self.connection.healthy()
+    }
+    
     /// Consume message acknowledgements, and connection status updates.
     pub async fn consume(&mut self) -> Option<NSQEvent> {
         self.connection.consume().await

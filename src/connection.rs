@@ -58,6 +58,7 @@ impl ServerCertVerifier for Unverified {
 
 #[derive(serde::Serialize)]
 struct IdentifyBody {
+    heartbeat_interval: u32,    
     client_id: Option<String>,
     hostname: String,
     user_agent: String,
@@ -631,7 +632,7 @@ async fn run_generic<
 
     state.shared.healthy.store(true, Ordering::SeqCst);
 
-    state.from_connection_tx.send(NSQEvent::Healthy()).await?;
+    // state.from_connection_tx.send(NSQEvent::Healthy()).await?;
 
     let f1 = handle_commands(
         &state.config,
@@ -696,6 +697,7 @@ async fn run_connection(state: &mut NSQDConnectionState) -> Result<(), Error> {
     };
 
     let identify_body = IdentifyBody {
+        heartbeat_interval: 15000,
         client_id: state.config.shared.client_id.clone(),
         feature_negotiation: true,
         tls_v1: state.config.shared.tls.is_some(),
