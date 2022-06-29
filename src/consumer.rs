@@ -336,7 +336,7 @@ async fn rebalancer_step(
     let partial = if partial == 0 { 1 } else { partial };
 
     for node in healthy.into_iter() {
-        let _ = node.queue_message(MessageToNSQ::RDY(partial as u16)).await;
+        let _ = node.queue_message(MessageToNSQ::RDY(partial as u64)).await;
     }
 
     true

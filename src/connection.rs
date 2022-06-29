@@ -71,7 +71,7 @@ struct IdentifyBody {
 
 #[derive(serde::Deserialize)]
 struct IdentifyResponse {
-    max_rdy_count: u16,
+    max_rdy_count: u64,
     version: String,
     max_msg_timeout: u32,
     msg_timeout: u32,
@@ -105,7 +105,7 @@ pub enum MessageToNSQ {
     DPUB(Arc<NSQTopic>, Vec<u8>, u32),
     MPUB(Arc<NSQTopic>, Vec<Vec<u8>>),
     SUB(Arc<NSQTopic>, Arc<NSQChannel>),
-    RDY(u16),
+    RDY(u64),
     FIN([u8; 16]),
     REQ([u8; 16], u16, NSQRequeueDelay),
     TOUCH([u8; 16]),
@@ -216,8 +216,8 @@ struct NSQDConnectionShared {
     to_connection_tx_ref:
         Arc<tokio::sync::mpsc::Sender<MessageToNSQ>>,
     inflight: AtomicU64,
-    current_ready: AtomicU16,
-    max_ready: AtomicU16,
+    current_ready: AtomicU64,
+    max_ready: AtomicU64,
 }
 
 #[derive(Debug)]
@@ -369,7 +369,7 @@ async fn write_fin<S: AsyncWrite + std::marker::Unpin>(
 
 async fn write_rdy<S: AsyncWrite + std::marker::Unpin>(
     stream: &mut S,
-    count: u16,
+    count: u64,
 ) -> Result<(), Error> {
     stream.write_all(b"RDY ").await?;
     stream.write_all(count.to_string().as_bytes()).await?;
@@ -1003,8 +1003,8 @@ impl NSQDConnection {
             healthy: AtomicBool::new(false),
             to_connection_tx_ref: to_connection_tx_ref_1.clone(),
             inflight: AtomicU64::new(0),
-            current_ready: AtomicU16::new(0),
-            max_ready: AtomicU16::new(0),
+            current_ready: AtomicU64::new(0),
+            max_ready: AtomicU64::new(0),
         });
 
         let shared_state_clone = shared_state.clone();
